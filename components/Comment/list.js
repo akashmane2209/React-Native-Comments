@@ -1,5 +1,6 @@
 import React, {Component, PropTypes} from 'react';
 import {RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
+import io from 'socket.io-client';
 
 import {getComments, addComment} from '../../apis/comment';
 
@@ -14,6 +15,10 @@ export default class List extends Component {
 
   componentDidMount = () => {
     this.fetchComments();
+    this.socket = io('http://192.168.0.120:3000');
+    this.socket.on('add comment', comment => {
+      this.fetchComments();
+    });
   };
 
   onRefresh = () => {
@@ -38,9 +43,7 @@ export default class List extends Component {
     try {
       const response = await addComment({user_id: user._id, content: content});
       const comment = response.data.comment;
-      if (comment) {
-        this.fetchComments();
-      }
+      this.socket.emit('add comment', comment);
     } catch (error) {
       alert(error);
     }
@@ -73,7 +76,7 @@ export default class List extends Component {
           }>
           {/* Render each comment with Comment component */}
           {comments.map((comment, index) => (
-            <Comment comment={comment} key={index} />
+            <Comment comment={comment} key={index} user={this.props.user} />
           ))}
         </ScrollView>
         {/* Comment input box */}

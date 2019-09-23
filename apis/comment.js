@@ -26,3 +26,12 @@ export const getReplies = async comment_id => {
   const response = await axios.get(`${apiUrl}/getReplies?id=${comment_id}`);
   return response;
 };
+
+export const getLikes = async comment_id => {
+  const response = await axios.get(`${apiUrl}/likes?id=${comment_id}`);
+  return response;
+};
+
+export const changeLike = async (data, comment_id) => {
+  return await axios.put(`${apiUrl}/likes?id=${comment_id}`, data);
+};

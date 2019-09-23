@@ -4,10 +4,7 @@ import Comments from './components/Comment/list';
 
 export default class App extends Component {
   state = {
-    user: {
-      name: 'Akash',
-      _id:"5d847ff76982c5104fc6fa79"
-    }, // not logged in yet
+    user: undefined, // not logged in yet
   };
 
   // Gets called after user logs in with Facebook or Google

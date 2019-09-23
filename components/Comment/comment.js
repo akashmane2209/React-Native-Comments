@@ -2,14 +2,57 @@ import React, {PureComponent, PropTypes} from 'react';
 import {TouchableOpacity, StyleSheet, Text, View} from 'react-native';
 import moment from 'moment';
 import ReplyInput from './replyCommentInput';
-import ReplyComment from './replyComment';
+import io from 'socket.io-client';
 
-import {addReply, getReplies} from '../../apis/comment';
+import {addReply, getReplies, getLikes, changeLike} from '../../apis/comment';
 
 export default class Comment extends PureComponent {
   state = {
     reply: false,
     replies: [],
+    likes: [],
+    likeCount: 0,
+    liked: false,
+  };
+
+  async componentDidMount() {
+    this.getLikes();
+    this.socket = io('http://192.168.0.120:3000');
+    const comment_id = this.props.comment._id;
+    this.socket.on(`${comment_id}like`, message => {
+      if (message == 'Add') {
+        console.log('Add');
+        this.setState({likeCount: this.state.likeCount + 1});
+      } else {
+        this.setState({likeCount: this.state.likeCount - 1});
+      }
+    });
+  }
+
+  getLikes = async () => {
+    const response = await getLikes(this.props.comment._id);
+    const user_id = this.props.user._id;
+    if (response.data.likes.indexOf(user_id) != -1) {
+      this.setState({liked: true});
+    }
+    this.setState({likes: response.data.likes, likeCount: response.data.count});
+  };
+
+  changeLike = async () => {
+    try {
+      const userid = this.props.user._id;
+      const comment_id = this.props.comment._id;
+      const response = await changeLike({userid: userid}, comment_id);
+      console.log(response);
+      // alert(response.data.message);
+      this.setState({liked: !this.state.liked});
+      this.socket.emit('like', {
+        message: response.data.message,
+        id: comment_id,
+      });
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   getReplies = async () => {
@@ -65,8 +108,17 @@ export default class Comment extends PureComponent {
             {moment(created).fromNow()}
           </Text>
           <View style={styles.actionContainer}>
-            <TouchableOpacity style={styles.actionContent}>
-              <Text>Like</Text>
+            <Text>{this.state.likeCount}</Text>
+            <TouchableOpacity
+              style={[styles.actionContent]}
+              onPress={this.changeLike}>
+              <Text
+                style={[
+                  styles.likeText,
+                  !this.state.liked ? styles.inactive : [],
+                ]}>
+                Like
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionContent}
@@ -77,7 +129,7 @@ export default class Comment extends PureComponent {
           {this.state.reply ? (
             <View>
               {this.state.replies.map((reply, index) => (
-                <Comment comment={reply} key={index} />
+                <Comment comment={reply} key={index} user={this.props.user} />
               ))}
               <ReplyInput onSubmit={this.addReplyHandler} />
             </View>
@@ -116,5 +168,15 @@ const styles = StyleSheet.create({
   },
   actionContent: {
     padding: 5,
+  },
+  inactive: {
+    color: '#000',
+  },
+  likeText: {
+    color: '#3F51B5',
+    fontWeight: 'bold',
+    fontFamily: 'Avenir',
+    textAlign: 'center',
+    fontSize: 15,
   },
 });
