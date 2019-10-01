@@ -1,25 +1,35 @@
 import React, {Component} from 'react';
 import Login from './components/login';
 import Comments from './components/Comment/list';
+import Comment from './components/Comment/comment';
+import Reply from './components/Comment/replyComment';
+import {createAppContainer} from 'react-navigation';
+import {createStackNavigator} from 'react-navigation-stack';
+
+const AppNavigator = createStackNavigator(
+  {
+    Login: {
+      screen: Login,
+    },
+    List: {
+      screen: Comments,
+    },
+    Comment: {
+      screen: Comment,
+    },
+    Reply: {
+      screen: Reply,
+    },
+  },
+  {
+    initialRouteName: 'Login',
+  },
+);
+
+const AppContainer = createAppContainer(AppNavigator);
 
 export default class App extends Component {
-  state = {
-    user: undefined, // not logged in yet
-  };
-
-  // Gets called after user logs in with Facebook or Google
-  onLoggedIn = user => {
-    this.setState({user});
-  };
-
   render() {
-    const {user} = this.state;
-    return user ? (
-      // Show comments if user is logged in
-      <Comments user={user} />
-    ) : (
-      // Show login screen otherwise
-      <Login onLoggedIn={user => this.onLoggedIn(user)} />
-    );
+    return <AppContainer />;
   }
 }

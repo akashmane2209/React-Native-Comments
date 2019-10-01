@@ -14,6 +14,7 @@ export default class Login extends Component {
 
   state = {
     name: undefined,
+    user: undefined, // not logged in yet
   };
 
   onChangeText = text => {
@@ -30,7 +31,10 @@ export default class Login extends Component {
       console.log('API CALL', name);
       const response = await login({name: name});
       if (response.status === 200) {
-        this.props.onLoggedIn(response.data);
+        // this.setState({user: response.data});
+        this.props.navigation.navigate('List', {
+          user: response.data,
+        });
       }
     } catch (e) {
       console.log(e);

@@ -37,7 +37,8 @@ export default class List extends Component {
   };
 
   submitComment = async comment => {
-    const {user} = this.props;
+    const {navigation} = this.props;
+    const user = navigation.getParam('user');
     const content = comment;
     this._scrollView.scrollTo({y: 0});
     try {
@@ -50,6 +51,8 @@ export default class List extends Component {
   };
 
   render() {
+    const {navigation} = this.props;
+    const user = navigation.getParam('user');
     const {comments} = this.state;
     return (
       <View style={styles.container}>
@@ -76,7 +79,12 @@ export default class List extends Component {
           }>
           {/* Render each comment with Comment component */}
           {comments.map((comment, index) => (
-            <Comment comment={comment} key={index} user={this.props.user} />
+            <Comment
+              key={comment._id}
+              comment={comment}
+              user={user}
+              navigation={this.props.navigation}
+            />
           ))}
         </ScrollView>
         {/* Comment input box */}
