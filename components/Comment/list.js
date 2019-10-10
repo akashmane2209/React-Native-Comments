@@ -1,4 +1,4 @@
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
 import {RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
 import io from 'socket.io-client';
 
